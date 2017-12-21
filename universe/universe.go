@@ -17,11 +17,23 @@ type Universe struct {
 	// regions map[int]*Regions
 }
 
-// MakeUniverse returns a loaded Universe
-func MakeUniverse() (*Universe, error) {
-	u := Universe{apiInfo: esi.MakeAPIInfo(universeAPIEndpoint), systems: make(map[int]*System)}
-	err := u.UpdateUniverse()
-	return &u, err
+// universe is the singleton instance
+var entireUniverse *Universe
+
+// GetUniverse implements a singleton pattern
+// It returns entireUniverse, and loads it from the API
+// if necessary
+func GetUniverse() (*Universe, error) {
+
+	var err error
+
+	if entireUniverse == nil {
+		entireUniverse = &Universe{apiInfo: esi.MakeAPIInfo(universeAPIEndpoint), systems: make(map[int]*System)}
+		err = entireUniverse.UpdateUniverse()
+	}
+
+	return entireUniverse, err
+
 }
 
 // UpdateUniverse refreshes the universe's system list from the API
@@ -50,7 +62,7 @@ func (u *Universe) UpdateUniverse() error {
 
 	u.systems = newSystemMap
 
-	return err
+	return nil
 }
 
 // GetSystem returns a loaded system if it is in the universe
@@ -70,10 +82,10 @@ func (u *Universe) GetSystem(systemID int) (*System, error) {
 		if s, err = MakeSystem(systemID); err == nil {
 			u.systems[systemID] = s
 		} else {
-			s = nil
+			return nil, err
 		}
 	}
-	return s, err
+	return s, nil
 }
 
 // APIInfo returns the apiInfo object

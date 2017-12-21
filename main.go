@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	eveUniverse, err := universe.MakeUniverse()
+	eveUniverse, err := universe.GetUniverse()
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
